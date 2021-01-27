@@ -1,0 +1,24 @@
+# vim:fdm=marker
+zstyle ':prezto:load'	pmodule \
+			'history' \
+			'utility' \
+			'syntax-highlighting' \
+			'history-substring-search' \
+			'completion' \
+			'autosuggestions' \
+			'prompt'
+
+zstyle :prezto:module:prompt theme powerlevel10k
+
+zstyle ':prezto:module:syntax-highlighting' color 'yes'
+
+# zstyle ':prezto:module:history-substring-search:color' found ''
+zstyle ':prezto:module:history-substring-search:color' not-found ''
+
+#: Screen {{{
+# Auto start a session when Zsh is launched in a local terminal.
+# zstyle ':prezto:module:screen:auto-start' local 'yes'
+
+# Auto start a session when Zsh is launched in a SSH connection.
+# zstyle ':prezto:module:screen:auto-start' remote 'yes'
+#: }}}
