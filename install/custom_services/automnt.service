@@ -1,0 +1,11 @@
+# Uses udevadm to monitor for drives to mount
+
+[Unit]
+Type=simple
+Description=My Auto Mount
+
+[Service]
+ExecStart=/usr/local/bin/automnt.sh
+
+[Install]
+WantedBy = multi-user.target
