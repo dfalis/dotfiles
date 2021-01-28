@@ -14,13 +14,13 @@ USR_LOCAL_BIN="/usr/local/bin"
 
 [[ ! -d $USR_LOCAL_BIN ]] && sudo mkdir -p "$USR_LOCAL_BIN"
 
-if [[ "$device" -eq "normal" ]]
-then
+if [[ "$device" -eq "normal" ]]; then
 	sudo cp "$BIN_SRC/notification-service.sh" "$USR_LOCAL_BIN"
+	sudo chmod a+x "$USR_LOCAL_BIN"
 
-elif [[ "$device" -eq "rpi" ]]
-then
+elif [[ "$device" -eq "rpi" ]]; then
 	sudo cp -r "$BIN_SRC/*" "$USR_LOCAL_BIN"
+	sudo chmod a+x "$USR_LOCAL_BIN"
 
 else
 	printf -- 'Unknown option!\n'
