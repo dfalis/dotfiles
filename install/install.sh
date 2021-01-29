@@ -14,11 +14,13 @@ USR_LOCAL_BIN="/usr/local/bin"
 
 [[ ! -d $USR_LOCAL_BIN ]] && sudo mkdir -p "$USR_LOCAL_BIN"
 
-if [[ "$device" -eq "normal" ]]; then
+if [[ "$device" -eq "normal" ]]
+then
 	sudo cp "$BIN_SRC/notification-service.sh" "$USR_LOCAL_BIN"
 	sudo chmod a+x "$USR_LOCAL_BIN"
 
-elif [[ "$device" -eq "rpi" ]]; then
+elif [[ "$device" -eq "rpi" ]]
+then
 	sudo cp -r "$BIN_SRC/*" "$USR_LOCAL_BIN"
 	sudo chmod a+x "$USR_LOCAL_BIN"
 
@@ -65,21 +67,17 @@ fi
 
 # }}}
 
-# Create user kodi_autologin {{{
+# Create user kodi_autologin and install autologin override for getty@tty1 {{{
 
 if [[ "$device" -eq "rpi" ]]
 then
 	sudo useradd -m kodi_autologin
+
+	UNIT="getty@tty1"
+	DIR="/etc/systemd/system/${UNIT}.service.d"
+	
+	sudo mkdir "$DIR"
+	sudo cp "./service_overrides/${UNIT}_override.conf" "$DIR/override.conf"
 fi
-
-# }}}
-
-# Install override to autologin as kodi_autologin user {{{
-
-UNIT="getty@tty1"
-DIR="/etc/systemd/system/${UNIT}.service.d"
-
-sudo mkdir "$DIR"
-sudo cp "./service_overrides/${UNIT}_override.conf" "$DIR/override.conf"
 
 # }}}
