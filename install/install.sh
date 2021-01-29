@@ -28,19 +28,34 @@ fi
 
 # }}}
 
-# Install auto-mount service on rpi {{{
+# Install services and timers {{{
+
+if [[ "$device" -eq "rpi" ]]
+then
+	PATH_SERVICES="./custom_services"
+	PATH_DEST="/etc/systemd/system/"
+
+	# copy services and timers into /etc/systemd/system
+	sudo cp "$PATH_SERVICES/*.service" "$PATH_DEST"
+	sudo cp "$PATH_SERVICES/*.timer" "$PATH_DEST"
+
+	# Reload daemon after installation of services and timers
+	sudo systemctl daemon-reload
+
+	sudo systemctl enable --now automnt.service
+	sudo systemctl enable create_ap_at_boot.timer
+fi
+
+# }}}
+
+# Additional setup for auto-mount service on rpi {{{
 
 if [[ "$device" -eq "rpi" ]]
 then
 	MNT_MEDIA="/media"
-	PATH_SERVICES="./custom_services"
-	PATH_DEST="/etc/systemd/system/"
 
 	[[ ! -d $MNT_MEDIA ]] && sudo mkdir -p "$MNT_MEDIA"
 	
-	# create service
-	sudo cp "$PATH_SERVICES/automnt.service" "$PATH_DEST"
-
 	# create udev rules for mounting to /media
 	sudo cp "./custom_rules/99-udisks2.rules" "/etc/udev/rules.d/"
 	
@@ -66,14 +81,5 @@ DIR="/etc/systemd/system/${UNIT}.service.d"
 
 sudo mkdir "$DIR"
 sudo cp "./service_overrides/${UNIT}_override.conf" "$DIR/override.conf"
-
-# }}}
-
-# Reload daemon after installation of services, rules and overrides {{{
-
-if [[ "$device" -eq "rpi" ]]
-then
-	sudo systemctl daemon-reload
-fi
 
 # }}}

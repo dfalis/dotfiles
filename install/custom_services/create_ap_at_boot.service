@@ -1,0 +1,9 @@
+[Unit]
+Description=Create Access point at startup if no internet access is present.
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/create_ap_if_no_wifi.sh
+
+[Install]
+WantedBy=multi-user.target
