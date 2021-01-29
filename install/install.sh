@@ -50,3 +50,30 @@ fi
 
 # }}}
 
+# Create user kodi_autologin {{{
+
+if [[ "$device" -eq "rpi" ]]
+then
+	sudo useradd -m kodi_autologin
+fi
+
+# }}}
+
+# Install override to autologin as kodi_autologin user {{{
+
+UNIT="getty@tty1"
+DIR="/etc/systemd/system/${UNIT}.service.d"
+
+sudo mkdir "$DIR"
+sudo cp "./service_overrides/${UNIT}_override.conf" "$DIR/override.conf"
+
+# }}}
+
+# Reload daemon after installation of services, rules and overrides {{{
+
+if [[ "$device" -eq "rpi" ]]
+then
+	sudo systemctl daemon-reload
+fi
+
+# }}}
