@@ -1,5 +1,5 @@
 [Unit]
-Description=Log cpu info every minute after 1 minute since boot
+Description=Log cpu info every minute after 1 minute since boot into ~/Desktop/cpu-temps.log
 
 [Timer]
 OnBootSec=1min
