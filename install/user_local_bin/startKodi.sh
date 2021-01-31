@@ -10,7 +10,7 @@ while [[ $SECONDS -lt $FIFTMINUTE ]]; do
 
 	if $TVSERVICE -d /dev/null | grep -q '^Written'; then
 	
-		printf -- 'Starting Kodi...'
+		printf -- 'Starting Kodi...\n'
 
 		kodi --standalone
 		break

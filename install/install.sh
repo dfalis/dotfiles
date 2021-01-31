@@ -1,11 +1,20 @@
 #! /bin/bash
 # vim:fileencoding=utf-8:foldmethod=marker
 
-printf -- 'Which device are you on? [rpi]\n'
-printf -- '(normal | rpi)\n'
-
+# Get device type
+printf -- 'Which device are you on? (normal/RPI)\n'
 read device
 device=${device:-rpi}
+
+# Ask to shorten boot time only if on RPI device
+shorten_boot='n'
+if [[ "$device" -eq "rpi" ]]
+then
+	# Shorten boot time
+	printf -- 'Do you want to shorten boot time by disabling services that are not needed? (Y/n)\n'
+	read shorten_boot
+	shorten_boot=${shorten_boot:-y}
+fi
 
 # Install /usr/local/bin scripts {{{
 
@@ -50,6 +59,18 @@ then
 	sudo systemctl enable --now notification-service.timer
 fi
 
+# }}}
+
+# Shorted boot time for RPi by disabling services {{{
+if [[ "$shorten_boot" -eq "y" ]]
+then
+	# on rpi we dont need lvm and it shortends time by a lot
+	sudo systemctl mask lvm2-monitor.service
+	
+	# also we dont need to kill any wireless devices
+	# (comment if want to make HW wifi killswitch)
+	sudo systemctl mask systemd-rfkill.service
+fi
 # }}}
 
 # Additional setup for auto-mount service on rpi {{{

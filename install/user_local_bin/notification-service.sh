@@ -30,11 +30,11 @@ write_value(){
 	if [[ $grepped =~ $regex_is_num ]]; then
 		
 		echo "$grepped" > $cache_file
-		printf -- '%s packages needs to be updated.' "$grepped"
+		printf -- '%s packages needs to be updated.\n' "$grepped"
 
 	else
 		echo '0' > $cache_file
-		printf -- 'Bad value read! [%s]' "$grepped"
+		printf -- 'Bad value read! [%s]\n' "$grepped"
 	fi
 }
 # }}}

@@ -8,6 +8,6 @@ stdbuf -oL -- udevadm monitor --udev -s block | while read -r -- _ _ event devpa
 	if [ "$event" = add ]; then
 		devname=$(pathtoname "$devpath")
 		udisksctl mount --block-device "$devname" --no-user-interaction && \
-			printf -- 'Successfully mounted "%s".' "$devname"
+			printf -- 'Successfully mounted "%s".\n' "$devname"
 	fi
 done

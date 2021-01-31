@@ -1,5 +1,5 @@
 [Unit]
-Description=Log cpu info into ~/Desktop/cpu-temp.log
+Description=Log cpu info into /var/log/cpu-temp.log
 
 [Service]
 Type=simple

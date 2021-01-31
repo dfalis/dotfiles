@@ -1,12 +1,12 @@
 #! /bin/bash
 
 DATE=`date "+%Y-%m-%d %H:%M:%S"`
-logfile="$HOME/Desktop/cpu-temps.log"
+logfile="/var/log/cpu-temps.log"
 
-cpu_freq=$(($(vcgencmd measure_clock arm | cut -d= -f2) / 1000000))
-cpu_temp=$(vcgencmd measure_temp | cut -d= -f2 | /bin/grep -oP "^[0-9]*\.[0-9]+(?='C)")
-cpu_voltage=$(vcgencmd measure_volts | cut -d= -f2)
-cpu_throttled=$(vcgencmd get_throttled | cut -d= -f2)
+cpu_freq=$(($(/opt/vc/bin/vcgencmd measure_clock arm | cut -d= -f2) / 1000000))
+cpu_temp=$(/opt/vc/bin/vcgencmd measure_temp | cut -d= -f2 | /bin/grep -oP "^[0-9]*\.[0-9]+(?='C)")
+cpu_voltage=$(/opt/vc/bin/vcgencmd measure_volts | cut -d= -f2)
+cpu_throttled=$(/opt/vc/bin/vcgencmd get_throttled | cut -d= -f2)
 
 reset_color="\e[0m"
 
