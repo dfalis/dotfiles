@@ -14,6 +14,7 @@ curl -s "https://ipapi.co/json" > /dev/null 2>&1
 if [[ $? -eq 0 ]]
 then
 	CONNECTED=true
+	printf -- 'Connected to wifi... Not creating AP for control.'
 else
 	CONNECTED=false
 fi
@@ -24,8 +25,9 @@ fi
 
 if [[ "$CONNECTED" = false ]]; then
 
-	CMD_PARAMS+=' -n'
+	printf -- 'Not connected to wifi... Trying to create AP...'
 
+	CMD_PARAMS+=' -n'
 	/usr/bin/create_ap $CMD_PARAMS "$AP_IFACE" "$AP_NAME" "$AP_PASSWORD"
 
 	# Else dont do anything

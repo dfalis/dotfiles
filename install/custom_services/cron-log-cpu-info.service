@@ -1,0 +1,9 @@
+[Unit]
+Description=Log cpu info into ~/Documents/cpu-temp.log
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/cron-log-cpu-temp.sh
+
+[Install]
+WantedBy=multi-user.target
