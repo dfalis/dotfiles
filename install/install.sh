@@ -45,7 +45,9 @@ then
 	sudo systemctl daemon-reload
 
 	sudo systemctl enable --now automnt.service
-	sudo systemctl enable create_ap_at_boot.timer
+	sudo systemctl enable --now create_ap_at_boot.timer
+	sudo systemctl enable --now cron-log-cpu-info.timer
+	sudo systemctl enable --now notification-service.timer
 fi
 
 # }}}
