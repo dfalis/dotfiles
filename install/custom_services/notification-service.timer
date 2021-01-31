@@ -2,7 +2,7 @@
 Description=Run script on boot
 
 [Timer]
-OnCalender=*-*-* 4:00:00
+OnCalendar=*-*-* 4:00:00
 Persistent=true
 
 [Install]
