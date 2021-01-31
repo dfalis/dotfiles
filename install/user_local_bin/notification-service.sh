@@ -23,16 +23,18 @@ read_value(){
 
 # Write value {{{
 write_value(){
-	yay -Syy > /dev/null 2>&1
+	yay -Sy > /dev/null 2>&1
 	grepped="$(yay -Qu | wc -l)"
 	[ -d $cache_path ] || mkdir $cache_path
 	
 	if [[ $grepped =~ $regex_is_num ]]; then
 		
 		echo "$grepped" > $cache_file
+		printf -- '%s packages needs to be updated.' "$grepped"
 
 	else
 		echo '0' > $cache_file
+		printf -- 'Bad value read! [%s]' "$grepped"
 	fi
 }
 # }}}

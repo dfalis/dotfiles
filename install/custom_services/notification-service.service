@@ -1,0 +1,9 @@
+[Unit]
+Description=Get number of packages needed to be updated for greeting message
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/notification-service.sh
+
+[Install]
+WantedBy=multi-user.target
