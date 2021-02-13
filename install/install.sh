@@ -24,13 +24,26 @@ fi
 
 # }}}
 
+# Add pipo to sudoers file {{{
+
+# TODO:
+
+# }}}
+
 # install yay {{{
 
+# pacman -Syy
 # pacman -S --needed git base-devel sudo
 # git clone https://aur.archlinux.org/yay.git
 # cd yay
 # makepkg -si
 # cd ..
+
+# }}}
+
+# install other packages {{{
+
+# yay -S zsh prezto prezto-git 
 
 # }}}
 
