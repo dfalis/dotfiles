@@ -24,6 +24,19 @@ fi
 
 # }}}
 
+# Configure locale {{{
+
+# in file /etc/locale.gen find line '#en_US.UTF-8 UTF-8' find and uncomment with sed
+# locale-gen
+
+# }}}
+
+# Make pacman colorful {{{
+
+#  uncomment '#Color'
+
+# }}}
+
 # Add pipo to sudoers file {{{
 
 # TODO:
@@ -43,9 +56,25 @@ fi
 
 # install other packages {{{
 
-# yay -S zsh prezto prezto-git 
+# yay -S zsh prezto prezto-git lsd neofetch htop youtube-dl
+
+# if any rpi
+# yay -S rng-tools
+
+# if rpi 4
+# yay -S ffmpeg
 
 # }}}
+
+# Setup rng-tools {{{
+
+# if any rpi, check if rnd or haveged is running, if haveged, configure rngd
+# 	bash -c 'echo RNGD_OPTS=\"-o /dev/random -r /dev/hwrng\" > /etc/conf.d/rngd'
+# 	sudo systemctl disable haveged.service
+# 	sudo systemctl enable --now rngd.service
+# 	sudo systemctl stop haveged.service
+
+# }}
 
 # Install /usr/local/bin scripts {{{
 
