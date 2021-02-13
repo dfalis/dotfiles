@@ -16,6 +16,24 @@ then
 	shorten_boot=${shorten_boot:-y}
 fi
 
+# Create new user pipo instead of the default one {{{
+
+# if rpi device
+#	sudo useradd -G wheel -m pipo
+#	sudo passwd pipo
+
+# }}}
+
+# install yay {{{
+
+# pacman -S --needed git base-devel sudo
+# git clone https://aur.archlinux.org/yay.git
+# cd yay
+# makepkg -si
+# cd ..
+
+# }}}
+
 # Install /usr/local/bin scripts {{{
 
 BIN_SRC="./user_local_bin"
