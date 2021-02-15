@@ -106,6 +106,9 @@ printf -- '\n'
 # 	sudo systemctl disable --now haveged.service
 #	printf -- 'Enabling rngd...\n'
 # 	sudo systemctl enable --now rngd.service
+
+#	add to /boot/cmdline.txt entry random.trust_cpu=on
+
 #	printf -- '\n'
 #fi
 
@@ -162,6 +165,13 @@ then
 
 	printf -- '\n'
 fi
+
+# }}}
+
+# Setup network services {{{
+
+# sudo systemctl mask systemd-networkd.service
+# sudo systemctl enable --now NetworkManager.service
 
 # }}}
 
