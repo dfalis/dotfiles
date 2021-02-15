@@ -48,6 +48,12 @@ printf -- 'Changing locale...\n'
 printf -- '\n'
 # }}}
 
+# Configure time zone {{{
+
+sudo timedatectl set-timezone Europe/Bratislava
+
+# }}}
+
 # Make pacman colorful {{{
 
 printf -- 'Setting colorful pacman...\n'
