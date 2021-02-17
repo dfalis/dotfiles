@@ -94,7 +94,7 @@ printf -- '\n'
 # install other packages {{{
 
 printf -- 'Installing other packages...\n'
-# yay -S zsh prezto prezto-git lsd neofetch htop youtube-dl avahi figlet exfat-utils
+# yay -S zsh prezto prezto-git lsd neofetch htop youtube-dl avahi figlet exfat-utils udisks2
 
 #if [[ "$device" -eq "rpi" ]]
 #then
