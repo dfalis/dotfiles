@@ -135,7 +135,7 @@ printf -- '\n'
 #	sudo systemctl enable --now ufw.service
 
 #	add rules for firewall
-#	sudo ufw allow ssh
+#	sudo ufw limit ssh
 #	sudo ufw allow CIFS
 
 #	start firewall
