@@ -258,6 +258,8 @@ then
 	# remove mountpoints in /media on boot
 	sudo bash -c 'echo "D /media 0755 root root 0 -" > /etc/tmpfiles.d/media.conf'
 	
+	sudo systemctl enable --now udisks2.service
+	
 	printf -- '\n'
 fi
 
