@@ -39,9 +39,11 @@ printf -- '\n'
 
 # Create new user $user_name instead of the default one {{{
 
-printf -- 'Creating user %s...\n' "$user_name"
+printf -- 'Creating user %s...' "$user_name"
 # sudo useradd -G wheel -m $user_name
-printf -- 'Insert password for user %s\n' "$user_name"
+printf -- ' Done\n'
+
+printf -- 'Insert password for user %s' "$user_name"
 # sudo passwd $user_name
 
 printf -- '\n'
@@ -51,9 +53,10 @@ printf -- '\n'
 
 # Configure locale {{{
 
-printf -- 'Changing locale...\n'
+printf -- 'Changing locale...'
 # in file /etc/locale.gen find line '#en_US.UTF-8 UTF-8' find and uncomment with sed
 # locale-gen
+printf -- ' Done\n'
 
 printf -- '\n'
 # }}}
@@ -66,50 +69,59 @@ sudo timedatectl set-timezone Europe/Bratislava
 
 # Make pacman colorful {{{
 
-printf -- 'Setting colorful pacman...\n'
+printf -- 'Setting colorful pacman...'
 #  uncomment '#Color'
+printf -- ' Done\n'
+
 printf -- '\n'
 # }}}
 
 # Add pipo to sudoers file {{{
 
-printf -- 'Adding user %s to sudoers...\n' "$user_name"
+printf -- 'Adding user %s to sudoers...' "$user_name"
 # TODO:
+printf -- ' Done\n'
 
 # }}}
 
 # install yay {{{
 
-printf -- 'Installing yay...\n'
+printf -- 'Installing yay...'
 # pacman -Syy
 # pacman -S --needed git base-devel sudo
 # git clone https://aur.archlinux.org/yay.git
 # cd yay
 # makepkg -si
 # cd ..
+printf -- ' Done\n'
 
 printf -- '\n'
 # }}}
 
 # install other packages {{{
 
-printf -- 'Installing other packages...\n'
+printf -- 'Installing other packages...'
 # yay -S zsh prezto prezto-git lsd neofetch htop youtube-dl avahi figlet exfat-utils udisks2
+printf -- ' Done\n'
 
 #if [[ "$device" -eq "rpi" ]]
 #then
-#	printf -- 'Installing rng-tools, ufw on rpi...\n'
+#	printf -- 'Installing rng-tools, ufw on rpi...'
 # 	yay -S rng-tools ufw
+#	printf -- ' Done\n'
 #fi
 
 #if [[ "$samba_install" -eq "y" ]] || [[ "$samba_install" -eq "Y" ]]
 #then
+#	printf -- 'Installing samba server...'
 #	yay -S samba
+#	printf -- ' Done\n'
 #fi
 
 # if rpi 4
-#	printf -- 'Installing ffmpeg...\n'
+#	printf -- 'Installing ffmpeg...'
 # 	yay -S ffmpeg
+#	printf -- ' Done\n'
 
 printf -- '\n'
 # }}}
@@ -118,6 +130,7 @@ printf -- '\n'
 
 #if [[ "$device" -eq "rpi" ]]
 #then
+	printf -- 'Setting up firewall... '
 #	enable service
 #	sudo systemctl enable --now ufw.service
 
@@ -127,6 +140,7 @@ printf -- '\n'
 
 #	start firewall
 #	sudo ufw enable
+	printf -- ' Done\n'
 #fi
 
 # }}}
@@ -135,10 +149,13 @@ printf -- '\n'
 
 #if [[ "$samba_install" -eq "y" ]] || [[ "$samba_install" -eq "Y" ]]
 #then
-# copy /etc/samba/smb.conf
+	printf -- 'Setting up samba server...'
+
+# 	copy /etc/samba/smb.conf
 
 #	sudo useradd -s /usr/bin/nologin samba
 #	sudo smbpasswd -a samba
+	printf -- ' Done\n'
 
 #fi
 
@@ -153,10 +170,12 @@ printf -- '\n'
 #	if running haveged, and if on zero then
 #	
 # 	bash -c 'echo RNGD_OPTS=\"-o /dev/random -r /dev/hwrng -x jitter\" > /etc/conf.d/rngd'
-#	printf -- 'Disabling haveged...\n'
+#	printf -- 'Disabling haveged...'
 # 	sudo systemctl disable --now haveged.service
-#	printf -- 'Enabling rngd...\n'
+#	printf -- ' Done\n'
+#	printf -- 'Enabling rngd...'
 # 	sudo systemctl enable --now rngd.service
+#	printf -- ' Done\n'
 
 #	add to /boot/cmdline.txt entry random.trust_cpu=on
 
@@ -167,7 +186,7 @@ printf -- '\n'
 
 # Install /usr/local/bin scripts {{{
 
-printf -- 'Installing my custom scripts...\n'
+printf -- 'Installing my custom scripts...'
 
 BIN_SRC="./user_local_bin"
 USR_LOCAL_BIN="/usr/local/bin"
@@ -188,6 +207,8 @@ else
 	printf -- 'Unknown option!\n'
 fi
 
+printf -- ' Done\n'
+
 printf -- '\n'
 # }}}
 
@@ -199,20 +220,25 @@ then
 	PATH_DEST="/etc/systemd/system/"
 
 	# copy services and timers into /etc/systemd/system
-	printf -- 'Installing services...\n'
+	printf -- 'Installing services...'
 	sudo cp "$PATH_SERVICES/*.service" "$PATH_DEST"
-	printf -- 'Installing timers...\n'
+	printf -- ' Done\n'
+	
+	printf -- 'Installing timers...'
 	sudo cp "$PATH_SERVICES/*.timer" "$PATH_DEST"
+	printf -- ' Done\n'
 
 	# Reload daemon after installation of services and timers
-	printf -- 'Reloading daemon...\n'
+	printf -- 'Reloading daemon...'
 	sudo systemctl daemon-reload
+	printf -- ' Done\n'
 
-	printf -- 'Enabling services...\n'
+	printf -- 'Enabling services...'
 	sudo systemctl enable --now automnt.service
 	sudo systemctl enable --now create_ap_at_boot.timer
 	sudo systemctl enable --now cron-log-cpu-info.timer
 	sudo systemctl enable --now notification-service.timer
+	printf -- ' Done\n'
 
 	printf -- '\n'
 fi
@@ -229,15 +255,17 @@ fi
 # Shorted boot time for RPi by disabling services {{{
 if [[ "$shorten_boot" -eq "y" ]] || [[ "$shorten_boot" -eq "Y" ]]
 then
-	printf -- 'Speeding up boot...\n'
-	printf -- 'Disabling lvm2-monitor.service\n'
+	printf -- 'Speeding up boot...'
+	printf -- 'Disabling lvm2-monitor.service...'
 	# on rpi we dont need lvm and it shortends time by a lot
 	sudo systemctl mask lvm2-monitor.service
+	printf -- ' Done\n'
 	
-	printf -- 'Disabling systemd-rfkill.service\n'
+	printf -- 'Disabling systemd-rfkill.service...'
 	# also we dont need to kill any wireless devices
 	# (comment if want to make HW wifi killswitch)
 	sudo systemctl mask systemd-rfkill.service
+	printf -- ' Done\n'
 	
 	printf -- '\n'
 fi
@@ -247,7 +275,7 @@ fi
 
 if [[ "$device" -eq "rpi" ]]
 then
-	printf -- 'Adding auto mount rules...\n'
+	printf -- 'Adding auto mount rules...'
 	MNT_MEDIA="/media"
 
 	[[ ! -d $MNT_MEDIA ]] && sudo mkdir -p "$MNT_MEDIA"
@@ -260,6 +288,7 @@ then
 	
 	sudo systemctl enable --now udisks2.service
 	
+	printf -- ' Done\n'
 	printf -- '\n'
 fi
 
@@ -269,8 +298,9 @@ fi
 
 if [[ "$device" -eq "rpi" ]]
 then
-	printf -- 'Creating user kodi_autologin'
+	printf -- 'Creating user kodi_autologin...'
 	sudo useradd -m kodi_autologin
+	# TODO: maybe needs to set passwd for user kodi_autologin
 
 	UNIT="getty@tty1"
 	DIR="/etc/systemd/system/${UNIT}.service.d"
@@ -279,6 +309,7 @@ then
 	printf -- 'Creating override service for %s' "$UNIT"
 	sudo cp "./service_overrides/${UNIT}_override.conf" "$DIR/override.conf"
 	
+	printf -- ' Done\n'
 	printf -- '\n'
 fi
 
