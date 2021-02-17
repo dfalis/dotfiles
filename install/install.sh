@@ -107,7 +107,7 @@ printf -- '\n'
 #	printf -- 'Checking status of rngd and haveged...\n'
 #	if running haveged, and if on zero then
 #	
-# 	bash -c 'echo RNGD_OPTS=\"-o /dev/random -r /dev/hwrng\" > /etc/conf.d/rngd'
+# 	bash -c 'echo RNGD_OPTS=\"-o /dev/random -r /dev/hwrng -x jitter\" > /etc/conf.d/rngd'
 #	printf -- 'Disabling haveged...\n'
 # 	sudo systemctl disable --now haveged.service
 #	printf -- 'Enabling rngd...\n'
