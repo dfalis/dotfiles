@@ -18,6 +18,16 @@ then
 	printf -- '\n'
 fi
 
+# Ask if to install Samba server
+if [[ "$device" -eq "rpi" ]]
+then
+	printf -- 'Do you want to install Samba server? (Y/n)\n'
+	read samba_install
+	samba_install=${samba_install:-y}
+	
+	printf -- '\n'
+fi
+
 # Get name of new user {{{
 
 printf -- 'What user do you want to create? (default: pipo)\n'
@@ -84,12 +94,17 @@ printf -- '\n'
 # install other packages {{{
 
 printf -- 'Installing other packages...\n'
-# yay -S zsh prezto prezto-git lsd neofetch htop youtube-dl avahi figlet
+# yay -S zsh prezto prezto-git lsd neofetch htop youtube-dl avahi figlet exfat-utils
 
 #if [[ "$device" -eq "rpi" ]]
 #then
-#	printf -- 'Installing rng-tools on rpi...\n'
-# 	yay -S rng-tools
+#	printf -- 'Installing rng-tools, ufw on rpi...\n'
+# 	yay -S rng-tools ufw
+#fi
+
+#if [[ "$samba_install" -eq "y" ]] || [[ "$samba_install" -eq "Y" ]]
+#then
+#	yay -S samba
 #fi
 
 # if rpi 4
@@ -97,6 +112,36 @@ printf -- 'Installing other packages...\n'
 # 	yay -S ffmpeg
 
 printf -- '\n'
+# }}}
+
+# Setup ufw firewall {{{
+
+#if [[ "$device" -eq "rpi" ]]
+#then
+#	enable service
+#	sudo systemctl enable --now ufw.service
+
+#	add rules for firewall
+#	sudo ufw allow ssh
+#	sudo ufw allow CIFS
+
+#	start firewall
+#	sudo ufw enable
+#fi
+
+# }}}
+
+# Setup samba server {{{
+
+#if [[ "$samba_install" -eq "y" ]] || [[ "$samba_install" -eq "Y" ]]
+#then
+# copy /etc/samba/smb.conf
+
+#	sudo useradd -s /usr/bin/nologin samba
+#	sudo smbpasswd -a samba
+
+#fi
+
 # }}}
 
 # Setup rng-tools {{{
@@ -182,7 +227,7 @@ fi
 # }}}
 
 # Shorted boot time for RPi by disabling services {{{
-if [[ "$device" -eq "rpi" ]] && [[ "$shorten_boot" -eq "y" ]]
+if [[ "$shorten_boot" -eq "y" ]] || [[ "$shorten_boot" -eq "Y" ]]
 then
 	printf -- 'Speeding up boot...\n'
 	printf -- 'Disabling lvm2-monitor.service\n'
