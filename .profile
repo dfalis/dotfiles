@@ -23,8 +23,7 @@ export VISUAL=nvim
 
 # Execute on startup {{{
 
-# clear terminal and show greeting message
-clear
+# show greeting message
 [[ -f ~/.zsh/greeting.zsh ]] && ~/.zsh/greeting.zsh
 
 # }}}
