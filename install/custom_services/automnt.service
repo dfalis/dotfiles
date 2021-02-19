@@ -1,10 +1,10 @@
 # Uses udevadm to monitor for drives to mount
 
 [Unit]
-Type=simple
 Description=My Auto Mount
 
 [Service]
+Type=simple
 ExecStart=/usr/local/bin/automnt.sh
 
 [Install]
