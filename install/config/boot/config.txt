@@ -1,0 +1,26 @@
+# See /boot/overlays/README for all available options
+
+initramfs initramfs-linux.img followkernel
+
+hdmi_force_hotplug=1
+hdmi_drive=2
+hdmi_group=1
+hdmi_mode=16
+
+[pi0]
+gpu_mem=256
+
+[pi4]
+# ---- Disable wifi and bluetooth on rpi 4 ----
+#dtoverlay=disable-wifi
+dtoverlay=disable-bt
+
+# ---- gpu stuff ----
+dtoverlay=vc4-kms-v3d
+
+# ---- Overclocking ----
+#over_voltage=2
+#arm_freq=1750
+
+# ---- include kodi config ----
+#include kodi.config.txt

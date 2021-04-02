@@ -1,0 +1,15 @@
+[Unit]
+Description=Aria2c download manager
+Requires=network.target
+After=NetworkManager.service
+
+[Service]
+Type=forking
+User=pipo
+RemainAfterExit=yes
+ExecStart=/usr/bin/aria2c --conf-path=/home/pipo/aria2/aria.conf
+ExecReload=/usr/bin/kill -HUP $MAINPID
+ExecStop=/usr/bin/kill -s STOP $MAINPID
+
+[Install]
+WantedBy=multi-user.target

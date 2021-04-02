@@ -5,7 +5,7 @@ Description=Get number of packages needed to be updated for greeting message
 Type=simple
 User=pipo
 Group=pipo
-ExecStart=/usr/local/bin/notification-service.sh -w
+ExecStart=/usr/local/bin/notification_service.sh -w
 
 [Install]
 WantedBy=multi-user.target

@@ -3,7 +3,7 @@ Description=Log cpu info into /var/log/cpu-temp.log
 
 [Service]
 Type=simple
-ExecStart=/usr/local/bin/cron-log-cpu-temp.sh
+ExecStart=/usr/local/bin/cron_log_cpu_temp.sh
 
 [Install]
 WantedBy=multi-user.target
