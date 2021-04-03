@@ -321,7 +321,7 @@ function configure_sudoers() {
     print_stage_banner "configure_sudoers()"
 
     # if env keep exists, dont add it
-    if grep -qxF 'Defaults env_keep += "EDITOR VISUAL"' /etc/sudoers
+    if ! grep -qxF 'Defaults env_keep += "EDITOR VISUAL"' /etc/sudoers
     then
         printf -- 'Adding env_keep EDITOR and VISUAL...'
         sed -i '1s/^/Defaults env_keep += "EDITOR VISUAL"\n/' /etc/sudoers
@@ -331,7 +331,7 @@ function configure_sudoers() {
     check_return_code
 
     # if wheel is in sudoers, dont add it
-    if grep -qxF '%wheel ALL=(ALL) ALL' /etc/sudoers
+    if ! grep -qxF '%wheel ALL=(ALL) ALL' /etc/sudoers
     then
         printf -- 'Adding group %wheel to sudoers...'
         sed -i '1s/^/%wheel ALL=(ALL) ALL\n/' /etc/sudoers
@@ -383,6 +383,18 @@ function configure_boot() {
 }
 # }}}
 
+# Install sudo {{{
+function install_sudo() {
+    print_stage_banner "install_sudo()"
+
+    printf -- 'Installing sudo...'
+    pacman -S --needed sudo
+    check_return_code
+
+    printf -- '\n'
+}
+# }}}
+
 # install yay {{{
 function install_yay() {
     print_stage_banner "install_yay()"
@@ -398,8 +410,8 @@ function install_yay() {
     pacman -Syy
     check_return_code
 
-    printf -- 'Installing dependencies "git base-devel sudo"...\n'
-    pacman -S --needed git base-devel sudo
+    printf -- 'Installing dependencies "git base-devel"...\n'
+    pacman -S --needed git base-devel
     check_return_code
 
     local home_dir=/home/$user_name
@@ -616,7 +628,7 @@ function setup_rng_tools() {
     if [[ "$device" -eq "rpi" ]]
     then
         printf -- "Checking status of rngd...\n"
-        if ! systemctl list-units --full -all | grep -qF "rngd.service"
+        if systemctl list-units --full -all | grep -qF "rngd.service"
         then
             printf -- "Service exists..."
 
@@ -645,7 +657,7 @@ function setup_rng_tools() {
             check_return_code
         fi
         
-        if ! grep -q '^RNGD_OPTS' /etc/conf.d/rngd
+        if grep -q '^RNGD_OPTS' /etc/conf.d/rngd
         then
             printf -- 'Commenting old rngd config...'
             sed -i 's/^RNGD_OPTS/#&/g' /etc/conf.d/rngd
@@ -879,9 +891,10 @@ function print_stages() {
     print_stage $((i++)) "Configure time zone"
     print_stage $((i++)) "Configure colorful pacman"
     print_stage $((i++)) "Configure boot configs"
+    print_stage $((i++)) "Install sudo"
+    print_stage $((i++)) "Configure sudoers"
     print_stage $((i++)) "Install yay"
     print_stage $((i++)) "Install packages"
-    print_stage $((i++)) "Configure sudoers"
     print_stage $((i++)) "Setup firewall"
     [[ $samba_install == "y" ]] && print_stage $((i++)) "Setup samba server"
     [[ $device == rpi* ]] && print_stage $((i++)) "Setup rng tools [rpi]"
@@ -908,9 +921,10 @@ configure_locale
 configure_time_zone
 configure_colorful_pacman
 configure_boot
+install_sudo        # install sudo
+configure_sudoers   # configure sudoers before installing yay and other stages that require pipo in sudo
 install_yay
 install_packages
-configure_sudoers
 setup_firewall
 setup_samba_server
 setup_rng_tools
