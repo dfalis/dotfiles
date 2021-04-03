@@ -336,7 +336,7 @@ function configure_sudoers() {
         printf -- 'Adding group %wheel to sudoers...'
         sed -i '1s/^/%wheel ALL=(ALL) ALL\n/' /etc/sudoers
     else
-        printf -- 'Already exists group %wheel in sudoers...'
+        printf -- 'Already exists group %%wheel in sudoers...'
     fi
     check_return_code
 
