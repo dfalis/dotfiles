@@ -616,7 +616,7 @@ function setup_rng_tools() {
     if [[ "$device" -eq "rpi" ]]
     then
         printf -- "Checking status of rngd...\n"
-        if systemctl list-units --full -all | grep -Fq "rngd.service"
+        if ! systemctl list-units --full -all | grep -qF "rngd.service"
         then
             printf -- "Service exists..."
 
@@ -645,7 +645,7 @@ function setup_rng_tools() {
             check_return_code
         fi
         
-        if grep -q '^RNGD_OPTS' /etc/conf.d/rngd
+        if ! grep -q '^RNGD_OPTS' /etc/conf.d/rngd
         then
             printf -- 'Commenting old rngd config...'
             sed -i 's/^RNGD_OPTS/#&/g' /etc/conf.d/rngd
@@ -907,10 +907,10 @@ configure_user
 configure_locale
 configure_time_zone
 configure_colorful_pacman
-configure_sudoers
 configure_boot
 install_yay
 install_packages
+configure_sudoers
 setup_firewall
 setup_samba_server
 setup_rng_tools
