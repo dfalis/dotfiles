@@ -7,6 +7,8 @@ if [ "$EUID" -ne 0 ]
     exit
 fi
 
+# TODO: fix paths to be relative to root folder of dotfiles
+
 # Variables {{{
 
 COLOR_RESET="\e[0m"
@@ -120,7 +122,7 @@ fi
 # Ask if to overclock rpi to 1750Mhz if rpi4
 if [[ $device == rpi4 ]]
 then
-	# ask if to shorten boot time
+	# ask if to overclock rpi 4 to 1750Mhz
     while true; do
         printf -- "${COLOR_LIGHT_BLUE}:: Do you want to overclock rpi 4 to 1750Mhz? ${COLOR_RESET}(${COLOR_GREEN}Y${COLOR_RESET}/n${COLOR_RESET})${COLOR_LIGHT_BLUE}: ${COLOR_RESET}"
         read yn
@@ -258,7 +260,7 @@ function configure_user() {
     print_stage_banner "configure_user()"
 
     printf -- "Copying dotfiles to '$user_name' folder..."
-    cp .profile .bashrc .bash_profile /home/$user_name
+    cp ../.profile ../.bashrc ../.bash_profile /home/$user_name
     check_return_code
 
     # TODO: from rpi0 copy parts of .bashrc for prompt etc
@@ -435,7 +437,7 @@ function install_packages() {
         check_return_code
 
         printf -- "Copying zsh configs into '$user_name' folder..."
-        cp -r .zshrc .zpreztorc .p10k.zsh .zsh/ /home/$user_name
+        cp -r ../.zshrc ../.zpreztorc ../.p10k.zsh ../.zsh/ /home/$user_name
         check_return_code
     fi
 
@@ -850,6 +852,7 @@ function print_stages() {
     printf -- 'Scripts steps:\n'
 
     id "$user_name" &> /dev/null || print_stage $((i++)) "Create new user '$user_name'"
+    print_stage $((i++)) "Configure user $user_name"
     print_stage $((i++)) "Configure locale"
     print_stage $((i++)) "Configure time zone"
     print_stage $((i++)) "Configure colorful pacman"
@@ -859,7 +862,13 @@ function print_stages() {
     print_stage $((i++)) "Install packages"
     print_stage $((i++)) "Setup firewall"
     [[ $samba_install == "y" ]] && print_stage $((i++)) "Setup samba server"
-    [[ "$device" -eq "rpi" ]] && print_stage $((i++)) "Setup rng tools [rpi]"
+    [[ $device == rpi* ]] && print_stage $((i++)) "Setup rng tools [rpi]"
+    print_stage $((i++)) "Install usr scripts"
+    print_stage $((i++)) "Install services and timers"
+    print_stage $((i++)) "Setup network services"
+    [[ $shorten_boot == "y" ]] && print_stage $((i++)) "Shorten boot time by disabling services"
+    [[ $auto_mount == "y" ]] && print_stage $((i++)) "Setup auto-mount service for storages"
+    print_stage $((i++)) "Create kodi_autologin user"
 
     printf -- '\n'
 
@@ -877,12 +886,12 @@ configure_locale
 configure_time_zone
 configure_colorful_pacman
 configure_sudoers
+configure_boot
 install_yay
 install_packages
 setup_firewall
 setup_samba_server
 setup_rng_tools
-configure_boot
 install_usr_local_bin_scripts
 install_services_and_timers
 setup_network_services
