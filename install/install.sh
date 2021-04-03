@@ -350,13 +350,20 @@ function configure_boot() {
     then
         print_stage_banner "configure_boot()"
 
-        printf -- "Editing '/boot/cmdline.txt'..."
-        # find line that doesnt start with #
-        # that contains root=/dev/
-        # and that doenst already have random.trust_cpu
-        # and if so than append random.trust_cpu=on to /boot/cmdline.txt
-        sed -i '/^[^#]*root=\/dev\// {/random.trust_cpu/!  s/$/ random.trust_cpu=on/}' /boot/cmdline.txt
-        check_return_code
+        # TODO: somehow differentiate between arch64 and 32 to properly setup boot
+        # TODO: arch 64 uses uboot
+        # TODO:     need to install uboot-tools
+        # TODO:     edit /boot/boot.txt arguments
+        # TODO:     then compile it with ./mkscr
+
+        # TODO: https://archlinuxarm.org/forum/viewtopic.php?f=65&t=13388
+        # printf -- "Editing '/boot/cmdline.txt'..."
+        # # find line that doesnt start with #
+        # # that contains root=/dev/
+        # # and that doenst already have random.trust_cpu
+        # # and if so than append random.trust_cpu=on to /boot/cmdline.txt
+        # sed -i '/^[^#]*root=\/dev\// {/random.trust_cpu/!  s/$/ random.trust_cpu=on/}' /boot/cmdline.txt
+        # check_return_code
 
         printf -- "Copying boot config..."
         # copy boot config into /boot
