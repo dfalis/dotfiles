@@ -3,11 +3,18 @@
 
 # Check if root
 if [ "$EUID" -ne 0 ]
-    then echo "Please run as root"
+then
+    printf -- 'Please run as root\n'
     exit
 fi
 
-# TODO: fix paths to be relative to root folder of dotfiles
+PARENT_COMMAND=$(ps -o comm= $PPID)
+ROOT_DIR=${PWD##*/}
+if [[ $ROOT_DIR != "dotfiles" ]] || [[ $PARENT_COMMAND != "setup_arch.sh" ]]
+then
+    printf -- 'Please run arch install script with setup_arch.sh\n'
+    exit
+fi
 
 # Variables {{{
 
@@ -260,10 +267,8 @@ function configure_user() {
     print_stage_banner "configure_user()"
 
     printf -- "Copying dotfiles to '$user_name' folder..."
-    cp ../.profile ../.bashrc ../.bash_profile /home/$user_name
+    cp .profile .bashrc .bash_profile /home/$user_name
     check_return_code
-
-    # TODO: from rpi0 copy parts of .bashrc for prompt etc
 
     printf -- '\n'
 }
@@ -355,7 +360,7 @@ function configure_boot() {
 
         printf -- "Copying boot config..."
         # copy boot config into /boot
-        cp boot/config.txt /boot
+        cp install/config/boot/config.txt /boot
         check_return_code
 
         if [[ $overclock_rpi == "y" ]]
@@ -408,15 +413,15 @@ function install_yay() {
     printf -- 'Getting yay from git...\n'
     local curr_dir=$(pwd)
 
-    cd $home_dir/Downloads
-    sudo -u $user_name git clone "https://aur.archlinux.org/yay.git"
+    printf -- "Downloading yay into $home_dir/Downloads..."
+    cd $home_dir/Downloads && sudo -u $user_name git clone "https://aur.archlinux.org/yay.git"
     check_return_code
 
     printf -- 'Installing yay...\n'
-    cd $home_dir/Downloads/yay
-    sudo -u $user_name makepkg -si
-    cd $curr_dir
+    cd $home_dir/Downloads/yay && sudo -u $user_name makepkg -si
     check_return_code
+    
+    cd $curr_dir
 
     printf -- '\n'
 }
@@ -437,7 +442,7 @@ function install_packages() {
         check_return_code
 
         printf -- "Copying zsh configs into '$user_name' folder..."
-        cp -r ../.zshrc ../.zpreztorc ../.p10k.zsh ../.zsh/ /home/$user_name
+        cp -r .zshrc .zpreztorc .p10k.zsh .zsh/ /home/$user_name
         check_return_code
     fi
 
@@ -461,20 +466,27 @@ function install_packages() {
         sudo -u $user_name yay -S aria2 nginx
         check_return_code
 
+        local home_dir=/home/$user_name
+        local curr_dir=$(pwd)
+
         printf -- 'Getting ariaNg...'
-        wget https://github.com/mayswind/AriaNg/releases/download/1.2.1/AriaNg-1.2.1-AllInOne.zip
+        cd $home_dir/Downloads && sudo -u $user_name wget https://github.com/mayswind/AriaNg/releases/download/1.2.1/AriaNg-1.2.1-AllInOne.zip
         check_return_code
 
-        printf -- 'Extracting ariaNg.zip...'
-        7z e AriaNg-1.2.1-AllInOne.zip
+        local ariangzip="$home_dir/Downloads/ariangzip"
+        printf -- "Extracting ariaNg.zip into '$ariangzip'..."
+        cd $home_dir/Downloads && sudo -u $user_name 7z e AriaNg-1.2.1-AllInOne.zip -oariangzip
         check_return_code
+
+        # go back to dotfiles folder
+        cd $curr_dir
 
         printf -- "Creating directory '~/.aria2'..."
-        sudo -u $user_name mkdir /home/$user_name/.aria2
+        sudo -u $user_name mkdir $home_dir/.aria2
         check_return_code
 
         printf -- 'Creating empty session file...'
-        sudo -u $user_name touch /home/$user_name/.aria2/session
+        sudo -u $user_name touch $home_dir/.aria2/session
         check_return_code
 
         printf -- "Copying config 'aria2.conf'..."
@@ -482,11 +494,14 @@ function install_packages() {
         check_return_code
         
         printf -- 'AriaNg server files setup...'
-        mkdir -p /var/www/ariang/web && cp index.html /var/www/ariang/web && cp install/config/var/www/ariang/nginx.conf /var/www/ariang/nginx.conf && chown -R $user_name:$user_name /var/www/ariang
+        mkdir -p /var/www/ariang/web && cp $ariangzip/index.html /var/www/ariang/web && cp install/config/var/www/ariang/nginx.conf /var/www/ariang/nginx.conf && chown -R $user_name:$user_name /var/www/ariang
         check_return_code
 
         # TODO: in service replace pipo with $user_name
         # TODO: also in smb.conf valid user
+        # TODO: aria2.service install
+        # TODO: nginx still not running nor setup for ariaNg
+        # TODO: test ariaNg setup
     fi
 
     if [[ $samba_install == "y" ]]
@@ -565,7 +580,7 @@ function setup_samba_server() {
         fi
 
         printf -- 'Coping config...'
-        cp config/etc/samba/smb.conf /etc/samba/smb.conf
+        cp install/config/etc/samba/smb.conf /etc/samba/smb.conf
         check_return_code
 
         printf -- 'Creating samba user...'
@@ -603,7 +618,7 @@ function setup_rng_tools() {
                 # if is active
                 printf -- "Already running..."
                 check_return_code
-                return
+                return 0
             else
                 # if inactive
                 printf -- "Inactive...Starting..."
@@ -626,7 +641,7 @@ function setup_rng_tools() {
         if grep -q '^RNGD_OPTS' /etc/conf.d/rngd
         then
             printf -- 'Commenting old rngd config...'
-            sed 's/^RNGD_OPTS/#&/g' /etc/conf.d/rngd
+            sed -i 's/^RNGD_OPTS/#&/g' /etc/conf.d/rngd
             check_return_code
         fi
 
@@ -645,8 +660,8 @@ function install_usr_local_bin_scripts() {
 
     printf -- 'Installing my custom scripts...'
 
-    BIN_SRC="./user_local_bin"
-    USR_LOCAL_BIN="/usr/local/bin"
+    local BIN_SRC="./install/user_local_bin"
+    local USR_LOCAL_BIN="/usr/local/bin"
 
     if [[ ! -d $USR_LOCAL_BIN ]]
     then
@@ -682,8 +697,8 @@ function install_services_and_timers() {
     then
         print_stage_banner "install_services_and_timers()"
 
-        PATH_SERVICES="./custom_services"
-        PATH_DEST="/etc/systemd/system/"
+        local PATH_SERVICES="./install/custom_services"
+        local PATH_DEST="/etc/systemd/system/"
 
         # copy services and timers into /etc/systemd/system
         printf -- 'Installing services...'
@@ -776,7 +791,7 @@ function auto_mnt_service_setup() {
     then
         print_stage_banner "auto_mnt_service_setup()"
 
-        MNT_MEDIA="/media"
+        local MNT_MEDIA="/media"
 
         if [[ ! -d $MNT_MEDIA ]]
         then
@@ -787,7 +802,7 @@ function auto_mnt_service_setup() {
 
         printf -- 'Adding auto mount rules...'
         # create udev rules for mounting to /media
-        cp "./custom_rules/99-udisks2.rules" "/etc/udev/rules.d/"
+        cp "./install/custom_rules/99-udisks2.rules" "/etc/udev/rules.d/"
         check_return_code
         
         # remove mountpoints in /media on boot
@@ -826,8 +841,8 @@ function create_kodi_autologin_user() {
             check_return_code
         fi
 
-        printf -- "Creating override service for $UNIT"
-        cp ./service_overrides/${UNIT}_override.conf $DIR/override.conf
+        printf -- "Creating override service for $UNIT..."
+        cp ./install/service_overrides/${UNIT}_override.conf $DIR/override.conf
         check_return_code
 
         if [[ ! -d /usr/local/bin ]]
@@ -837,10 +852,10 @@ function create_kodi_autologin_user() {
             check_return_code
         fi
 
+        # script startKodi.sh was copied in install_usr_local_bin_scripts() step
         printf -- "Installing script 'startKodi.sh' for starting kodi on boot..."
-        printf -- "\n[[ -f ~/startKodi.sh ]] && ./startKodi.sh\n" >> /home/kodi_autologin/.bashrc
+        printf -- "\n[[ -f /usr/local/bin/startKodi.sh ]] && /usr/local/bin/startKodi.sh\n" >> /home/kodi_autologin/.bashrc
         check_return_code
-        # script was copied in install_usr_local_bin_scripts() step
 
         printf -- '\n'
     fi
