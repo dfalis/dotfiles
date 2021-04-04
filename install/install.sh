@@ -107,6 +107,25 @@ user_name=${user_name:-pipo}
 printf -- '\n'
 # }}}
 
+# Get hostname for device {{{
+printf -- "${COLOR_LIGHT_BLUE}:: What hostname do you want to set? ${COLOR_RESET}(rpi4:${COLOR_GREEN}dunno${COLOR_RESET}, rpi0: ${COLOR_GREEN}zero${COLOR_RESET}, default: ${COLOR_GREEN}boii${COLOR_RESET})${COLOR_LIGHT_BLUE}: ${COLOR_RESET}"
+read hostname
+# strip spaces from name
+hostname=$(printf -- "$hostname" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')
+if [[ "$hostname" == "rpi0" ]]
+then
+    hostname=${hostname:-zero}
+
+elif [[ "$hostname" == "rpi4" ]]
+then
+    hostname=${hostname:-dunno}
+else
+    hostname=${hostname:-boii}
+fi
+
+printf -- '\n'
+# }}}
+
 # Ask to shorten boot time only if on RPI device
 if [[ $device == rpi* ]]
 then
@@ -272,6 +291,10 @@ function configure_user() {
     cp .profile .bashrc .bash_profile /home/$user_name
     check_return_code
 
+    printf -- "Fixing ownership of dotfiles in home folder of user '$user_name'..."
+    chown $user_name: .profile .bashrc .bash_profile
+    check_return_code
+
     printf -- '\n'
 }
 # }}}
@@ -318,34 +341,6 @@ function configure_colorful_pacman() {
 }
 # }}}
 
-# Add pipo to sudoers file {{{
-function configure_sudoers() {
-    print_stage_banner "configure_sudoers()"
-
-    # if env keep exists, dont add it
-    if ! grep -qxF 'Defaults env_keep += "EDITOR VISUAL"' /etc/sudoers
-    then
-        printf -- 'Adding env_keep EDITOR and VISUAL...'
-        sed -i '1s/^/Defaults env_keep += "EDITOR VISUAL"\n/' /etc/sudoers
-    else
-        printf -- 'Already exists env_keep EDITOR and VISUAL...'
-    fi
-    check_return_code
-
-    # if wheel is in sudoers, dont add it
-    if ! grep -qxF '%wheel ALL=(ALL) ALL' /etc/sudoers
-    then
-        printf -- 'Adding group %wheel to sudoers...'
-        sed -i '1s/^/%wheel ALL=(ALL) ALL\n/' /etc/sudoers
-    else
-        printf -- 'Already exists group %%wheel in sudoers...'
-    fi
-    check_return_code
-
-    printf -- '\n'
-}
-# }}}
-
 # Configure boot {{{
 function configure_boot() {
     if [[ "$device" -eq "rpi" ]]
@@ -385,16 +380,64 @@ function configure_boot() {
 }
 # }}}
 
-# Install sudo {{{
-function install_sudo() {
-    print_stage_banner "install_sudo()"
+# Set hostname {{{
+function set_hostname() {
+    printf -- "Setting hostname to '$hostname'..."
+    hostnamectl set-hostname "$hostname"
+    check_return_code
+}
+# }}}
+
+# Update system before installing other packages {{{
+function update_sys() {
+    print_stage_banner "update_sys()"
 
     printf -- 'Updating pacman cache...\n'
     pacman -Syy
     check_return_code
 
+    printf -- 'Starting system upgrade...\n'
+    pacman -Syu
+    check_return_code
+
+    printf -- '\n'
+}
+# }}}
+
+# Install sudo {{{
+function install_sudo() {
+    print_stage_banner "install_sudo()"
+
     printf -- 'Installing sudo...'
     pacman -S --needed sudo
+    check_return_code
+
+    printf -- '\n'
+}
+# }}}
+
+# Add pipo to sudoers file {{{
+function configure_sudoers() {
+    print_stage_banner "configure_sudoers()"
+
+    # if env keep exists, dont add it
+    if ! grep -qxF 'Defaults env_keep += "EDITOR VISUAL"' /etc/sudoers
+    then
+        printf -- 'Adding env_keep EDITOR and VISUAL...'
+        sed -i '1s/^/Defaults env_keep += "EDITOR VISUAL"\n/' /etc/sudoers
+    else
+        printf -- 'Already exists env_keep EDITOR and VISUAL...'
+    fi
+    check_return_code
+
+    # if wheel is in sudoers, dont add it
+    if ! grep -qxF '%wheel ALL=(ALL) ALL' /etc/sudoers
+    then
+        printf -- 'Adding group %wheel to sudoers...'
+        sed -i '1s/^/%wheel ALL=(ALL) ALL\n/' /etc/sudoers
+    else
+        printf -- 'Already exists group %%wheel in sudoers...'
+    fi
     check_return_code
 
     printf -- '\n'
@@ -453,7 +496,7 @@ function install_packages() {
     print_stage_banner "install_packages()"
 
     printf -- 'Installing other packages...'
-    sudo -u $user_name yay -S networkmanager lsd neofetch htop figlet exfat-utils udisks2 screen ntfs-3g openssh p7zip wget
+    sudo -u $user_name yay -S networkmanager lsd neofetch htop figlet exfat-utils udisks2 screen ntfs-3g openssh p7zip wget neovim
     check_return_code
 
     if [[ $device == rpi* ]] && [[ $device != rpi0 ]]
@@ -466,6 +509,10 @@ function install_packages() {
         cp -r .zshrc .zpreztorc .p10k.zsh .zsh/ /home/$user_name
         check_return_code
 
+        printf -- "Fixing ownership of configs in home folder of user '$user_name'..."
+        chown -R $user_name: .zshrc .zpreztorc .p10k.zsh .zsh/
+        check_return_code
+
         printf -- 'Setting zsh as default shell...'
         chsh -s /usr/bin/zsh $user_name
         check_return_code
@@ -473,8 +520,12 @@ function install_packages() {
 
     if [[ $device == rpi* ]]
     then
-    	printf -- 'Installing rng-tools, ufw on RPi...'
+    	printf -- 'Installing rng-tools, ufw, avahi on RPi...'
     	sudo -u $user_name yay -S rng-tools ufw avahi
+        check_return_code
+
+        printf -- 'Enabling avahi daemon...'
+        systemctl enable --now avahi-daemon.service
         check_return_code
     fi
     
@@ -906,6 +957,8 @@ function print_stages() {
     print_stage $((i++)) "Configure time zone"
     print_stage $((i++)) "Configure colorful pacman"
     print_stage $((i++)) "Configure boot configs"
+    print_stage $((i++)) "Set hostname to $hostname"
+    print_stage $((i++)) "Upgrade system"
     print_stage $((i++)) "Install sudo"
     print_stage $((i++)) "Configure sudoers"
     print_stage $((i++)) "Install yay"
@@ -936,6 +989,8 @@ configure_locale
 configure_time_zone
 configure_colorful_pacman
 #configure_boot
+set_hostname
+update_sys          # update system before installing other packages
 install_sudo        # install sudo
 configure_sudoers   # configure sudoers before installing yay and other stages that require pipo in sudo
 install_yay
