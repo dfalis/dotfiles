@@ -1,6 +1,8 @@
 #! /bin/bash
 # vim:fileencoding=utf-8:foldmethod=marker
 
+# TODO: somehow differentiate my prints from other commands like yay spamming terminal
+
 # Check if root
 if [ "$EUID" -ne 0 ]
 then
@@ -451,7 +453,7 @@ function install_packages() {
     print_stage_banner "install_packages()"
 
     printf -- 'Installing other packages...'
-    sudo -u $user_name yay -S lsd neofetch htop figlet exfat-utils udisks2 screen ntfs-3g openssh p7zip wget
+    sudo -u $user_name yay -S networkmanager lsd neofetch htop figlet exfat-utils udisks2 screen ntfs-3g openssh p7zip wget
     check_return_code
 
     if [[ $device == rpi* ]] && [[ $device != rpi0 ]]
@@ -462,6 +464,10 @@ function install_packages() {
 
         printf -- "Copying zsh configs into '$user_name' folder..."
         cp -r .zshrc .zpreztorc .p10k.zsh .zsh/ /home/$user_name
+        check_return_code
+
+        printf -- 'Setting zsh as default shell...'
+        chsh -s /usr/bin/zsh $user_name
         check_return_code
     fi
 
@@ -602,14 +608,23 @@ function setup_samba_server() {
         cp install/config/etc/samba/smb.conf /etc/samba/smb.conf
         check_return_code
 
-        printf -- 'Creating samba user...'
-    	useradd -s /usr/bin/nologin samba
-        check_return_code
+        if ! id "samba" &> /dev/null
+        then
+            printf -- 'Creating samba user...'
+            useradd -s /usr/bin/nologin samba
+            check_return_code
 
-        printf -- 'Insert password for samba user...'
-    	smbpasswd -a samba
+            printf -- 'Insert password for samba user...'
+            smbpasswd -a samba
+            check_return_code
 
-    	usermod -aG samba $user_name
+            printf -- "Adding $user_name to samba group..."
+            usermod -aG samba $user_name
+            check_return_code
+        else
+            printf -- 'samba user already exists...'
+            check_return_code
+        fi
 
         printf -- 'Creating folders for samba...'
         mkdir -p /media/secure /srv/sftp/{shared,private}
@@ -845,7 +860,7 @@ function create_kodi_autologin_user() {
         print_stage_banner "create_kodi_autologin_user()"
 
         printf -- "Creating user 'kodi_autologin'..."
-        useradd -m -aG samba kodi_autologin
+        useradd -m -G samba kodi_autologin
         check_return_code
 
         # TODO: maybe needs to set passwd for user kodi_autologin
@@ -936,11 +951,15 @@ auto_mnt_service_setup
 create_kodi_autologin_user
 
 printf -- "\n\n${TEXT_BOLD}${COLOR_GREEN}"
-print_banner "Everything is Done!\n"
+print_banner "Everything is Done!"
 printf -- "$COLOR_RESET"
 
 if [[ $ariaNg_setup == "y" ]]
 then
     printf -- "To ariaNg web add secret token to UI.\n"
     printf -- "To aria2 create token with '${COLOR_LIGHT_BLUE}openssl rand -base64 32${COLOR_RESET}'. Replace in config '~/.aria2/aria2.conf' string '**secret**'\n"
+
+    printf -- '\n'
 fi
+
+printf -- "You can now remove user 'alarm'...\n\n"
