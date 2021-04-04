@@ -268,7 +268,7 @@ function create_new_user() {
 function configure_user() {
     print_stage_banner "configure_user()"
 
-    printf -- "Copying dotfiles to '$user_name' folder..."
+    printf -- "Copying dotfiles to $user_name's home folder..."
     cp .profile .bashrc .bash_profile /home/$user_name
     check_return_code
 
@@ -389,6 +389,10 @@ function configure_boot() {
 function install_sudo() {
     print_stage_banner "install_sudo()"
 
+    printf -- 'Updating pacman cache...\n'
+    pacman -Syy
+    check_return_code
+
     printf -- 'Installing sudo...'
     pacman -S --needed sudo
     check_return_code
@@ -407,10 +411,6 @@ function install_yay() {
         check_return_code
         return 0
     fi
-
-    printf -- 'Updating pacman cache...\n'
-    pacman -Syy
-    check_return_code
 
     printf -- 'Installing dependencies "git base-devel"...\n'
     pacman -S --needed git base-devel
@@ -935,7 +935,7 @@ configure_user
 configure_locale
 configure_time_zone
 configure_colorful_pacman
-configure_boot
+#configure_boot
 install_sudo        # install sudo
 configure_sudoers   # configure sudoers before installing yay and other stages that require pipo in sudo
 install_yay
@@ -962,4 +962,6 @@ then
     printf -- '\n'
 fi
 
-printf -- "You can now remove user 'alarm'...\n\n"
+printf -- "You can now remove user 'alarm' with 'userdel alarm'\n\n"
+
+printf -- "Dont forget to change root password\n\n"
