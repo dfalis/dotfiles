@@ -18,7 +18,8 @@ export VISUAL=nvim
 
 # add to PATH
 [[ -d /opt/vc/bin ]] && export PATH="/opt/vc/bin:$PATH"
-[[ -d ~/.local/bin ]] && export PATH="~/.local/bin:$PATH"
+[[ -d $HOME/.local/bin ]] && export PATH="$HOME/.local/bin:$PATH"
+[[ -d $HOME/.npm-modules/bin ]] && export PATH="$HOME/.npm-modules/bin:$PATH"
 # }}}
 
 # Execute on startup {{{

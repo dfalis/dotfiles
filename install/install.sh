@@ -256,7 +256,7 @@ function create_new_user() {
         printf -- 'User %s not found. Creating user...' "$user_name"
 
         # add user
-        useradd "$user_name" -G wheel,sys -m
+        useradd "$user_name" -G wheel,sys,video -m
         check_return_code
 
         # asks for password till both are same
@@ -617,7 +617,8 @@ function setup_firewall() {
     then
         print_stage_banner "setup_firewall()"
 
-        printf -- 'Enabling servicce... '
+        # TODO: apply configs instead of commands
+        printf -- 'Enabling service... '
         # enable service
         systemctl enable --now ufw.service
         check_return_code
@@ -630,6 +631,7 @@ function setup_firewall() {
         printf -- 'Allowing Samba in firewall...'
         ufw allow CIFS
         check_return_code
+        # TODO: END OF TODO
 
         # start firewall
         printf -- 'Enabling firewall...'
@@ -661,11 +663,11 @@ function setup_samba_server() {
 
         if ! id "samba" &> /dev/null
         then
-            printf -- 'Creating samba user...'
+            printf -- "Creating user 'samba'..."
             useradd -s /usr/bin/nologin samba
             check_return_code
 
-            printf -- 'Insert password for samba user...'
+            printf -- "Creating smb user 'samba'... Insert password for samba user 'samba'...\n"
             smbpasswd -a samba
             check_return_code
 
@@ -673,16 +675,32 @@ function setup_samba_server() {
             usermod -aG samba $user_name
             check_return_code
         else
-            printf -- 'samba user already exists...'
+            printf -- "User 'samba' already exists..."
             check_return_code
         fi
 
-        printf -- 'Creating folders for samba...'
+        printf -- "Creating smb user '$user_name'... Insert password for samba user '$user_name'...\n"
+        smbpasswd -a $user_name
+        check_return_code
+
+        printf -- 'Creating folders for samba server...'
         mkdir -p /media/secure /srv/sftp/{shared,private}
+        check_return_code
+
+        printf -- "Changing ownership of folders..."
+        chown -R root:samba /media/secure /srv/sftp/{shared,private}
+        check_return_code
+
+        printf -- "Changing permissions for folders..."
+        chmod -R 775 /media/secure /srv/sftp/{shared,private}
         check_return_code
 
         # TODO:
         # add automatic creation of folder and adding it to smb.conf (template like)
+
+        printf -- 'Enabling samba on boot and now...'
+        systemctl enable --now smb.service
+        check_return_code
 
         printf -- '\n'
     fi
@@ -1017,6 +1035,38 @@ then
     printf -- '\n'
 fi
 
-printf -- "You can now remove user 'alarm' with 'userdel alarm'\n\n"
+# TODO:
+printf -- "You can now remove user 'alarm' with 'userdel alarm'\n"
+printf -- '\n'
 
-printf -- "Dont forget to change root password\n\n"
+# TODO:
+printf -- "Dont forget to change root password\n"
+printf -- '\n'
+
+# TODO: make it as an installation step
+printf -- "Veracrypt install\n"
+printf -- '%s\n' "https://launchpad.net/veracrypt/trunk/1.24-update7/+download/VeraCrypt_1.24-Update7_Source.tar.bz2"
+printf -- "%s\n" "install 'extra/wxgtk2'"
+printf -- '%s\n' 'cd src'
+printf -- '%s\n' 'make'
+printf -- '%s\n' 'cd Main -> veracrypt'
+printf -- '\n'
+
+# TODO: add this to install_packages() step
+printf -- "Install qbittorrent-nox...\n"
+printf -- '%s\n' 'yay -S qbittorrent-nox'
+printf -- '\n'
+
+# TODO: add this to install_packages() step
+# install flood
+printf -- 'Install flood with npm...\n'
+printf -- '%s\n' 'yay -S npm nodejs nginx'
+
+printf -- 'Configuring npm install prefix...\n'
+printf -- "Run '%s'\n" 'mkdir ~/.npm-modules'
+printf -- "    '%s'\n" 'npm config set prefix ~/.npm-modules'
+printf -- '\n'
+
+printf -- '%s\n' 'npm install --prefix $HOME/Downloads flood'
+printf -- '%s\n' 'mkdir -p /var/www'
+printf -- '%s\n' 'mv $HOME/Downloads/flood /var/www/flood_server'
