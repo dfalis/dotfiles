@@ -686,13 +686,19 @@ function setup_samba_server() {
         printf -- 'Creating folders for samba server...'
         mkdir -p /media/secure /srv/sftp/{shared,private}
         check_return_code
-
-        printf -- "Changing ownership of folders..."
-        chown -R root:samba /media/secure /srv/sftp/{shared,private}
+        printf -- 'Changing ownership of folder /media/secure and /srv/sftp/shared to root:samba...'
+        chown -R pipo:samba /srv/sftp/shared
+        check_return_code
+        printf -- 'Changing ownership of folder private to pipo:pipo...'
+        chown -R pipo:pipo /srv/sftp/private
         check_return_code
 
-        printf -- "Changing permissions for folders..."
-        chmod -R 775 /media/secure /srv/sftp/{shared,private}
+        printf -- "Changing permissions for folders /media/secure /srv/sftp/private to 600..."
+        chmod -R 700 /media/secure /srv/sftp/private
+        check_return_code
+
+        printf -- "Changing permissions for folders /media/secure /srv/sftp/private to 600..."
+        chmod -R 755 /srv/sftp/shared
         check_return_code
 
         # TODO:
@@ -1070,3 +1076,15 @@ printf -- '\n'
 printf -- '%s\n' 'npm install --prefix $HOME/Downloads flood'
 printf -- '%s\n' 'mkdir -p /var/www'
 printf -- '%s\n' 'mv $HOME/Downloads/flood /var/www/flood_server'
+
+printf -- 'Start flood server...'
+printf -- '%s\n' 'screen -R flood /var/www/flood_server/dist/index.js --baseuri="/flood"'
+printf -- '\n'
+
+# setup ssl for nginx flood server
+printf -- 'Create self-signed certificates...'
+printf -- '%s\n' 'openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt'
+printf -- '\n'
+printf -- 'Create DH key...'
+printf '%s\n' 'openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048'
+printf -- '\n'
