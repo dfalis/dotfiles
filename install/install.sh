@@ -664,7 +664,7 @@ function setup_samba_server() {
         if ! id "samba" &> /dev/null
         then
             printf -- "Creating user 'samba'..."
-            useradd -s /usr/bin/nologin samba
+            useradd -s /usr/bin/nologin -m samba
             check_return_code
 
             printf -- "Creating smb user 'samba'... Insert password for samba user 'samba'...\n"
@@ -1088,3 +1088,62 @@ printf -- '\n'
 printf -- 'Create DH key...'
 printf '%s\n' 'openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048'
 printf -- '\n'
+
+# TODO:
+printf -- 'Copy ssh keys to .ssh...\n'
+printf -- '\n'
+
+# TODO: new setup for CA authority instead of SSL for nginx
+# TODO: make a script for this and run it as sudo -u $user_name ./script
+# TODO: instead of multiple sudo -u $user_name
+
+# info https://www.digitalocean.com/community/tutorials/how-to-set-up-and-configure-a-certificate-authority-ca-on-debian-10
+
+    # TODO: setup easy-rsa
+    # yay -S easy-rsa
+    # mkdir ~/easy-rsa
+    # ln -s /etc/easy-rsa/* ~/easy-rsa/
+    # chmod 700 ~/easy-rsa
+    # cd ~/easy-rsa
+    # export EASYRSA=$(pwd)
+    # easyrsa init-pki
+
+    # TODO: build certificate authority
+    # export EASYRSA_VARS_FILE=$EASYRSA/vars
+    # easyrsa init-pki
+    # easyrsa build-ca
+
+    # TODO: create signed certificate
+    # mkdir ~/practice-csr
+    # cd ~/practice-csr
+    # openssl genrsa -out ~/practice-csr/dunno-server.key
+    # openssl req -new -key ~/practice-csr/dunno-server.key -out ~/practice-csr/dunno-server.req
+    # cp ~/practice-csr/dunno-server.req /tmp
+    # easyrsa import-req /tmp/dunno-server.req dunno-server
+    # easyrsa sign-req server dunno-server
+
+    # TODO: install signed certificates
+    # sudo cp ~/easy-rsa/pki/issued/dunno-server.crt /etc/ssl/certs
+    # sudo cp ~/practice-csr/dunno-server.key /etc/ssl/private
+    # systemctl enable --now nginx.service
+
+    # TODO: copy to devices
+    # scp dunno:~/easy-rsa/pki/ca.crt ~/Downloads
+
+    # TODO: install in windows
+    # printf -- 'cd ~/Downloads'
+    # printf -- 'certutil.exe -addstore Root .\ca.crt'
+
+    # TODO: install cockpit
+    # cp /var/www
+    # yay -S cockpit cockpit-pcp packagekit
+    # systemctl enable --now cockpit.socket
+    # systemctl enable --now pmlogger
+    # usermod -aG http pipo
+    # copy /etc/cockpit/cockpit.conf
+
+    # TODO: install rsync
+    # screen -R flood /var/www/flood_server/dist/index.js --baseuri="/flood"
+    # screen -R torrent qbittorrent-nox
+    # TODO: fix /etc/nginx.conf
+    #   put location / into /etc/nginx.conf and other stuff into http.conf

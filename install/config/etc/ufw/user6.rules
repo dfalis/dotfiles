@@ -31,12 +31,16 @@
 ### tuple ### allow tcp 139,445 ::/0 any ::/0 CIFS - in
 -A ufw6-user-input -p tcp -m multiport --dports 139,445 -j ACCEPT -m comment --comment 'dapp_CIFS'
 
-### tuple ### allow any 1337 ::/0 any ::/0 in
--A ufw6-user-input -p tcp --dport 1337 -j ACCEPT
--A ufw6-user-input -p udp --dport 1337 -j ACCEPT
-
 ### tuple ### allow tcp 6881 ::/0 any ::/0 qBittorrent - in
 -A ufw6-user-input -p tcp --dport 6881 -j ACCEPT -m comment --comment 'dapp_qBittorrent'
+
+### tuple ### allow any 443 ::/0 any ::/0 in
+-A ufw6-user-input -p tcp --dport 443 -j ACCEPT
+-A ufw6-user-input -p udp --dport 443 -j ACCEPT
+
+### tuple ### allow any 80 ::/0 any ::/0 in
+-A ufw6-user-input -p tcp --dport 80 -j ACCEPT
+-A ufw6-user-input -p udp --dport 80 -j ACCEPT
 
 ### END RULES ###
 
